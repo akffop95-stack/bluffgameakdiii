@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🃏 Bluff Casino</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════ LANDING ═══════════════════════════════ -->
+<div id="screen-landing" class="screen active">
+  <div class="stars"></div>
+  <div class="landing-inner">
+    <div class="casino-logo">
+      <div class="logo-cards">🂡 🂮 🂻</div>
+      <h1>BLUFF CASINO</h1>
+      <p class="tagline">The Ultimate 3-Player Bluffing Card Game</p>
+    </div>
+
+    <div class="landing-card glass-card">
+      <div class="form-group">
+        <label>YOUR NAME</label>
+        <input id="playerName" type="text" placeholder="Enter your name…" maxlength="15" autocomplete="off" />
+      </div>
+
+      <button class="btn btn-gold" onclick="createRoom()">🏠 &nbsp;Create Table</button>
+
+      <div class="or-divider"><span>OR JOIN A TABLE</span></div>
+
+      <div class="join-row">
+        <input id="roomCodeInput" type="text" placeholder="ENTER CODE" maxlength="5" autocomplete="off" />
+        <button class="btn btn-green" onclick="joinRoom()">🚪 Join</button>
+      </div>
+
+      <p class="hint">Share the 5-letter room code with your friends to play together!</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ LOBBY ════════════════════════════════ -->
+<div id="screen-lobby" class="screen">
+  <div class="phase-header">
+    <h2>🎰 BLUFF CASINO</h2>
+    <div class="room-code-box">
+      ROOM CODE &nbsp;
+      <span id="displayRoomCode" class="code-text">-----</span>
+      <button class="btn-icon" onclick="copyRoomCode()" title="Copy code">📋</button>
+    </div>
+  </div>
+
+  <div class="lobby-seats" id="lobbySeats"></div>
+
+  <div class="lobby-status" id="lobbyStatus">Waiting for players…</div>
+
+  <button id="startVotingBtn" class="btn btn-gold hidden" onclick="startVoting()">
+    🗳️ &nbsp;Start Dealer Vote
+  </button>
+</div>
+
+<!-- ═══════════════════════════════ VOTING ═══════════════════════════════ -->
+<div id="screen-voting" class="screen">
+  <div class="phase-header">
+    <h2>🗳️ DEALER ELECTION</h2>
+    <p class="phase-sub">Vote for who should deal the cards this round!</p>
+  </div>
+
+  <div class="vote-grid" id="voteGrid"></div>
+  <div class="vote-status" id="voteStatus">Select a player to vote them as dealer</div>
+</div>
+
+<!-- ═══════════════════════════════ BETTING ══════════════════════════════ -->
+<div id="screen-betting" class="screen">
+  <div class="phase-header">
+    <h2>💰 PLACE YOUR BETS</h2>
+    <p class="phase-sub" id="dealerLabel"></p>
+  </div>
+
+  <div class="bet-player-row" id="betPlayerRow"></div>
+
+  <div class="bet-box glass-card" id="betBox">
+    <div class="bet-balance">Your Balance: $<span id="myBalance">5000</span></div>
+
+    <div class="bet-slider-row">
+      <button class="chip-btn" onclick="adjustBet(-500)">−500</button>
+      <input id="betInput" type="number" value="500" min="100" />
+      <button class="chip-btn" onclick="adjustBet(500)">+500</button>
+    </div>
+
+    <div class="bet-quick">
+      <button onclick="setBet(100)">$100</button>
+      <button onclick="setBet(500)">$500</button>
+      <button onclick="setBet(1000)">$1K</button>
+      <button onclick="setBet(2500)">$2.5K</button>
+      <button class="allin" onclick="setBetAll()">🔥 ALL IN</button>
+    </div>
+
+    <button class="btn btn-gold" id="confirmBetBtn" onclick="placeBet()">✅ Confirm Bet</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ GAME ═════════════════════════════════ -->
+<div id="screen-game" class="screen game-screen">
+
+  <!-- Opponents top row -->
+  <div class="opponents-row" id="opponentsRow"></div>
+
+  <!-- Table center -->
+  <div class="table-area">
+    <div class="table-felt">
+
+      <div class="felt-top-row">
+        <div class="pile-box">
+          <div class="pile-icon">🂠</div>
+          <div class="pile-count" id="pileCount">0</div>
+          <div class="pile-label">cards in pile</div>
+        </div>
+        <div class="pot-box">
+          <div class="pot-label">💰 POT</div>
+          <div class="pot-amount">$<span id="potAmount">0</span></div>
+        </div>
+        <div class="rank-box">
+          <div class="rank-label">CLAIM</div>
+          <div class="rank-badge" id="currentRank">A</div>
+          <div class="rank-suffix">s</div>
+        </div>
+      </div>
+
+      <div class="last-play-row" id="lastPlayRow"></div>
+      <div class="bluff-banner hidden" id="bluffBanner"></div>
+
+    </div>
+
+    <!-- Buttons -->
+    <div class="table-buttons" id="tableButtons"></div>
+  </div>
+
+  <!-- My player info -->
+  <div class="me-bar" id="meBar"></div>
+
+  <!-- My hand -->
+  <div class="hand-area">
+    <div class="hand-label">YOUR HAND &nbsp;(<span id="handCount">0</span> cards)&nbsp;
+      <span class="hand-hint" id="handHint"></span>
+    </div>
+    <div class="hand-cards" id="handCards"></div>
+    <div class="play-confirm hidden" id="playConfirm">
+      <span id="playConfirmText"></span>
+      <button class="btn btn-gold play-go" onclick="playSelectedCards()">🃏 Play Cards</button>
+    </div>
+  </div>
+
+  <!-- Chat log -->
+  <div class="game-log">
+    <div class="log-header">📢 Game Log</div>
+    <div class="log-body" id="logBody"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ GAME OVER ════════════════════════════ -->
+<div id="screen-gameover" class="screen">
+  <div class="go-inner">
+    <div class="go-trophy">🏆</div>
+    <div class="go-title" id="goTitle"></div>
+    <div class="go-prize" id="goPrize"></div>
+    <div class="go-standings" id="goStandings"></div>
+    <button id="playAgainBtn" class="btn btn-gold hidden" onclick="playAgain()">🔄 Play Again</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOASTS ═══════════════════════════════ -->
+<div id="errorToast" class="toast toast-error"></div>
+<div id="notifToast" class="toast toast-notif"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>
